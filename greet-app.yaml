@@ -83,14 +83,12 @@ metadata:
   namespace: greet
   labels:
     app: greet-app
-    component: redis
 spec:
   ports:
   - port: 8080
     protocol: TCP
   selector:
     app: greet-app
-    component: redisi
 ---
 apiVersion: v1
 kind: Service
