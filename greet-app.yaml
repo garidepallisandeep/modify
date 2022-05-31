@@ -90,4 +90,18 @@ spec:
     protocol: TCP
   selector:
     app: greet-app
-    component: redis
+    component: redisi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: greet
+  name: greet-service-nodeport
+spec:
+  ports:
+    - port: 8080
+      targetPort: 80
+      protocol: TCP
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: greet-app
