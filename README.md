@@ -15,5 +15,7 @@ docker exec -it <container-name> /bin/bash
 kubectl apply -f greet-redis.yaml
 # setup greet
 kubectl apply -f greet-app.yaml
+# Setup Greet Ingress with ALB
+kubectl apply -f greet-ingress.yaml
 ```
 
