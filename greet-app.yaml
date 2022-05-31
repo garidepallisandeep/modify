@@ -1,0 +1,93 @@
+---
+apiVersion: "v1"
+kind: "Namespace"
+metadata:
+  name: "greet"
+---
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "greet-app-config-cvdp"
+  namespace: "greet"
+  labels:
+    app: "greet-app"
+data:
+  REDIS_HOST: "greet-redis-service"
+  REDIS_PORT: "6379"
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "greet-app"
+  namespace: "greet"
+  labels:
+    app: "greet-app"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "greet-app"
+  template:
+    metadata:
+      labels:
+        app: "greet-app"
+    spec:
+      containers:
+      - name: "greet-1"
+        image: "gcr.io/newscorp-newsiq-dev/greet:latest"
+        resources:
+          limits:
+            cpu: 200m
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 30Mi        
+        env:
+        - name: "REDIS_HOST"
+          valueFrom:
+            configMapKeyRef:
+              key: "REDIS_HOST"
+              name: "greet-app-config-cvdp"
+        - name: "REDIS_PORT"
+          valueFrom:
+            configMapKeyRef:
+              key: "REDIS_PORT"
+              name: "greet-app-config-cvdp"
+---
+apiVersion: "autoscaling/v2beta1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "greet-app-hpa-sjix"
+  namespace: "greet"
+  labels:
+    app: "greet-app"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "greet-app"
+    apiVersion: "apps/v1"
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: "Resource"
+    resource:
+      name: "cpu"
+      targetAverageUtilization: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: greet-service
+  namespace: greet
+  labels:
+    app: greet-app
+    component: redis
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+  selector:
+    app: greet-app
+    component: redis

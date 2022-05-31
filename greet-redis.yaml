@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: greet
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greet-redis
+  namespace: greet
+spec:
+  selector:
+    matchLabels:
+      app: greet-redis
+      component: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: greet-redis
+        component: redis
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: redis
+        image: redis:4.0
+        resources:
+          requests:
+            cpu: 0.1
+            memory: 64Mi
+          limits:
+            cpu: 0.5
+            memory: 512Mi
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: greet-redis-service
+  namespace: greet
+  labels:
+    app: greet-redis
+    component: redis
+spec:
+  ports:
+  - port: 6379
+    protocol: TCP
+  selector:
+    app: greet-redis
+    component: redis
